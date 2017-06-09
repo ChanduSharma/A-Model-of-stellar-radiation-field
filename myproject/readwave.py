@@ -29,10 +29,7 @@ def readwave(filename):
 		wt.writetable(float(wavelength))
 		
 		hr.hip_read(hipfile)
-		
-		if True:
-			break
-		
+
 	
 	wavelength_file.close()
 

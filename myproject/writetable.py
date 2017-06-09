@@ -38,7 +38,7 @@ def writetable(wavelength):
 		#print(normalized_flux)
 		x = '{}|{}\n'.format(spectral_type.strip(),normalized_flux)
 		
-		print(x)
+		#print(x)
 		
 		dict_file.write(x)
 		

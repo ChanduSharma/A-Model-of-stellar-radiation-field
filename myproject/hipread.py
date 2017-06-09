@@ -23,14 +23,14 @@ def hip_read(hipfile):
 	
 	lookup_table = dict()
 	
-	for lines in lookup_table:
+	for lines in lookup_table_file:
 		
 		spectral_type,flux = lines.split('|')
-		
+
 		lookup_table[spectral_type] = flux
 	
 	lookup_table_file.close()
-		
+	
 	
 	
 	HIPPARCOS_CATALOG="hip_main.dat"
@@ -64,7 +64,12 @@ def hip_read(hipfile):
 		#print(declination)
 		DEC = int(declination[0]) + sn * int(declination[1])/60 + sn * float(declination[2])/3600
         
-		v_mag = float(data_list[5])
+		v_mag_str = data_list[5]
+		
+		if not v_mag_str:
+			v_mag = 0.0
+		else:
+			v_mag = float(v_mag_str)
         
 		rightasc_str = data_list[8]
 		
@@ -87,7 +92,10 @@ def hip_read(hipfile):
 			distance = 1.0E+6
 		else:
 			parallax = float(parallax_str)
-			distance = 1.0E3/parallax
+			if parallax > 0.0:
+				distance = 1.0E3/parallax
+			else:
+				distance = 1.0E+6
 			
 		epstr = data_list[16]
 		
@@ -127,11 +135,8 @@ def hip_read(hipfile):
 			star_flux = lookup_table.get(spectral_type,0)
 		
 		#Writing the data to hipfile for wavelength of investigation.
-		data_file.write('#'*80)
-		data_file.write('This is the first phase of testing.')
-		data_file.write('#'*80)
 		
-		line_to_be_written = '{0}|{1}|{2}|{3}|{4}'.format(hip_no,hd_no,distance,spectral_type,star_flux)
+		line_to_be_written = '{0}|{1}|{2}|{3}|{4}\n'.format(hip_no,hd_no,distance,spectral_type,star_flux)
 		data_file.write(line_to_be_written)
 		
 		
@@ -139,3 +144,5 @@ def hip_read(hipfile):
 	data_file.close()
 	
 	
+if __name__ == '__main__':
+	hip_read('dhsj')
