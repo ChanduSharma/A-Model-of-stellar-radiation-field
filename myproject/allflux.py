@@ -4,11 +4,15 @@
 #  allflux.py
 #  
 #  Copyright 2017 chandu sharma <chandu@Mithras>
+import math
+from collections import namedtuple
+import ismextinction
+import ismabsorption
 
 def all_flux(wavelength,hipfile):
 
-    #cross_section = read_cross_section(wavelength)
-    #lam = read_lambda(wavelength)
+    cross_section = ismextinction.read_cross_section(wavelength)
+    lam = ismabsorption.read_lambda(wavelength)
     
     star_file = open(hipfile,'r')
 
@@ -21,25 +25,68 @@ def all_flux(wavelength,hipfile):
     skexpvalue,*rest = star_data[1].split()
 
     kexpvalue = float(skexpvalue)
-    print(kexpvalue)
-
+    #print(kexpvalue)
+    star = namedtuple('star','hip_number spectral_type hd_number distance_from_origin flux x y z')
     ##############################
     #Loop of hipfile starts here.#
     ##############################
+    processed_star_data = []
     for line in star_data[4:]:
         
         data = line.split('|')
         hip_no = data[0].strip()
-        gal_l = float(data[1])
-        gal_b = float(data[2])
-        distance = float(data[3])
-        spectral_type = data[4].strip()
-        star_flux = float(data[5])
-        hd_no = data[6].strip()
-        #print(line)
         
+        gal_l = float(data[1].strip())
+        gal_b = float(data[2].strip())
+        glr = math.radians(gal_l)
+        gbr = math.radians(gal_b)
+        
+        dist = float(data[3].strip())
+        x_c = distance * math.cos(gbr) * math.sin(glr)
+        y_c = distance * math.cos(gbr) * math.cos(glr)
+        z_c = distance * math.sin(gbr)
+        
+        spec_type = data[4].strip()
+        star_flux = float(data[5].strip())
+        
+        hd_no = data[6].strip()
+        
+        processed_star_data.append(star(hip_no,spec_type,hd_no,dist,star_flux,x_c,y_c,z_c))
+        #print(data)
 
-
+    del star_data
+    
+    pcintocm = lambda x: ( 3.085678E+18 * x )
+    
+    n = Ndensity
+    flux_matrix = [ [0 for i in range(0,200)] for j in range(0,200) ] 
+    
+    for i in range(0,10000,50):
+        for j in range(0,10000,50):
+            
+            k = 1 #Depending on which frame is being formed              
+            star_total_flux = 0
+            
+            for star in processed_star_data:
+                    
+                dx = star.x - i
+                dy = star.y - j
+                dz = star.z - k
+                    
+                dr2pc = math.pow(dx,2) + math.pow(dy,2) + math.pow(dz,2)
+                drpc = math.sqrt(dr2pc)
+                dr = pcintocm(drpc)
+                d4pir2 = 4.0 * math.pi * math.pow(dr,2) * kexpvalue
+                    
+                f dr > 0.0:
+                    tau = n * cross_section * dr
+                
+                star_flux = (star.flux / d4pir2) * math.exp(-tau)
+                    
+                    
+                    
+                    
+    
 
     
 
