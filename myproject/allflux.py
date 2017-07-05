@@ -11,7 +11,7 @@ import ismabsorption
 
 def all_flux(wavelength,hipfile):
 
-    cross_section = ismextinction.read_cross_section(wavelength)
+    cross_section = ismabsorption.read_cross_section(wavelength)
     lam = ismabsorption.read_lambda(wavelength)
     
     star_file = open(hipfile,'r')
@@ -61,24 +61,24 @@ def all_flux(wavelength,hipfile):
     n = Ndensity
     flux_matrix = [ [0 for i in range(0,200)] for j in range(0,200) ] 
     
-    for i in range(0,10000,50):
-        for j in range(0,10000,50):
+    for i in range(0,201):
+        for j in range(0,201):
             
             k = 1 #Depending on which frame is being formed              
             star_total_flux = 0
             
             for star in processed_star_data:
                     
-                dx = star.x - i
-                dy = star.y - j
-                dz = star.z - k
+                dx = star.x - i * 50
+                dy = star.y - j * 50
+                dz = star.z - k * 50
                     
-                dr2pc = math.pow(dx,2) + math.pow(dy,2) + math.pow(dz,2)
+                dr2pc = dx * dx + dy * dy + dz *dz
                 drpc = math.sqrt(dr2pc)
                 dr = pcintocm(drpc)
-                d4pir2 = 4.0 * math.pi * math.pow(dr,2) * kexpvalue
+                d4pir2 = 4.0 * math.pi * dr * dr * kexpvalue
                     
-                f dr > 0.0:
+                if dr > 0.0:
                     tau = n * cross_section * dr
                 
                 star_flux = (star.flux / d4pir2) * math.exp(-tau)
